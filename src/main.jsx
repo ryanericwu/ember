@@ -1093,7 +1093,7 @@ export default function EmberApp() {
 
       </div>
 
-      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 420, background: C.surface, borderTop: "1px solid " + C.border, padding: "8px 16px", display: "flex", justifyContent: "space-around" }}>
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 420, background: C.surface, borderTop: "1px solid " + C.border, padding: "8px 16px", display: "flex", justifyContent: "space-around", zIndex: 1000 }}>
         {NAV.map(function(n) {
           return (
             <button key={n.id} onClick={function() { setTab(n.id); }}
