@@ -34,6 +34,7 @@ var DB = {
   upsertWeight: function(w) { return sb("weight_log", { method: "POST", body: JSON.stringify(w), headers: { "Prefer": "resolution=merge-duplicates,return=representation" } }); },
   getExercises: function() { return sb("exercise_library?order=equipment_type.asc,name.asc"); },
   addExercise: function(e) { return sb("exercise_library", { method: "POST", body: JSON.stringify(e), headers: { "Prefer": "return=representation" } }); },
+  deleteExercise: function(id) { return sb("exercise_library?id=eq." + id, { method: "DELETE" }); },
   getCustomFoods: function() { return sb("custom_foods?order=name.asc"); },
   addCustomFood: function(f) { return sb("custom_foods", { method: "POST", body: JSON.stringify(f), headers: { "Prefer": "return=representation" } }); },
 };
@@ -491,6 +492,62 @@ function ProgressTab(props) {
   );
 }
 
+
+function SwipeToDelete(props) {
+  var onDelete = props.onDelete;
+  var children = props.children;
+  var [offsetX, setOffsetX] = useState(0);
+  var [startX, setStartX] = useState(null);
+  var THRESHOLD = 80;
+  var DELETE_WIDTH = 80;
+
+  function onTouchStart(e) {
+    setStartX(e.touches[0].clientX);
+  }
+
+  function onTouchMove(e) {
+    if (startX === null) return;
+    var diff = e.touches[0].clientX - startX;
+    if (diff < 0) {
+      setOffsetX(Math.max(diff, -DELETE_WIDTH));
+    }
+  }
+
+  function onTouchEnd() {
+    if (offsetX < -THRESHOLD) {
+      setOffsetX(-DELETE_WIDTH);
+    } else {
+      setOffsetX(0);
+    }
+    setStartX(null);
+  }
+
+  function reset() {
+    setOffsetX(0);
+  }
+
+  return (
+    <div style={{ position: "relative", overflow: "hidden", borderRadius: 16 }}>
+      {/* Delete button revealed behind */}
+      <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: DELETE_WIDTH, background: C.red, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "0 16px 16px 0" }}>
+        <button onClick={function() { reset(); onDelete(); }}
+          style={{ background: "none", color: "#fff", fontSize: 13, fontWeight: 700, padding: "0 16px", height: "100%" }}>
+          Delete
+        </button>
+      </div>
+      {/* Swipeable content */}
+      <div
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{ transform: "translateX(" + offsetX + "px)", transition: startX === null ? "transform 0.3s ease" : "none", position: "relative", zIndex: 1 }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function EmberApp() {
   var [loading, setLoading] = useState(true);
   var [loadErr, setLoadErr] = useState("");
@@ -707,6 +764,12 @@ export default function EmberApp() {
     // Save to DB in background
     await DB.upsertWeight(entry);
     await DB.upsertProfile(updated);
+  }
+
+  async function deleteExercise(id) {
+    setExercises(function(p) { return p.filter(function(e) { return e.id !== id; }); });
+    if (!String(id).startsWith("temp-ex-")) await DB.deleteExercise(id);
+    if (selEx === exercises.find(function(e) { return e.id === id; })?.name) setSelEx("");
   }
 
   async function addExercise() {
@@ -980,6 +1043,7 @@ export default function EmberApp() {
                     </div>
                   )}
                 </div>
+                </SwipeToDelete>
               );
             })}
             {Object.keys(prs).length > 0 && (
