@@ -498,8 +498,9 @@ function SwipeToDelete(props) {
   var children = props.children;
   var [offsetX, setOffsetX] = useState(0);
   var [startX, setStartX] = useState(null);
-  var THRESHOLD = 80;
-  var DELETE_WIDTH = 80;
+  var [isOpen, setIsOpen] = useState(false);
+  var THRESHOLD = 60;
+  var DELETE_WIDTH = 90;
 
   function onTouchStart(e) {
     setStartX(e.touches[0].clientX);
@@ -509,38 +510,43 @@ function SwipeToDelete(props) {
     if (startX === null) return;
     var diff = e.touches[0].clientX - startX;
     if (diff < 0) {
-      setOffsetX(Math.max(diff, -DELETE_WIDTH));
+      setOffsetX(Math.max(diff - (isOpen ? DELETE_WIDTH : 0), -DELETE_WIDTH));
+    } else if (isOpen) {
+      setOffsetX(Math.min(diff - DELETE_WIDTH, 0));
     }
   }
 
   function onTouchEnd() {
     if (offsetX < -THRESHOLD) {
       setOffsetX(-DELETE_WIDTH);
+      setIsOpen(true);
     } else {
       setOffsetX(0);
+      setIsOpen(false);
     }
     setStartX(null);
   }
 
   function reset() {
     setOffsetX(0);
+    setIsOpen(false);
   }
 
   return (
     <div style={{ position: "relative", overflow: "hidden", borderRadius: 16 }}>
-      {/* Delete button revealed behind */}
       <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: DELETE_WIDTH, background: C.red, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "0 16px 16px 0" }}>
-        <button onClick={function() { reset(); onDelete(); }}
-          style={{ background: "none", color: "#fff", fontSize: 13, fontWeight: 700, padding: "0 16px", height: "100%" }}>
+        <button
+          onTouchEnd={function(e) { e.stopPropagation(); reset(); onDelete(); }}
+          onClick={function() { reset(); onDelete(); }}
+          style={{ background: "none", color: "#fff", fontSize: 13, fontWeight: 700, padding: "0 16px", height: "100%", width: "100%" }}>
           Delete
         </button>
       </div>
-      {/* Swipeable content */}
       <div
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={{ transform: "translateX(" + offsetX + "px)", transition: startX === null ? "transform 0.3s ease" : "none", position: "relative", zIndex: 1 }}
+        style={{ transform: "translateX(" + offsetX + "px)", transition: startX === null ? "transform 0.25s ease" : "none", position: "relative", zIndex: 1 }}
       >
         {children}
       </div>
