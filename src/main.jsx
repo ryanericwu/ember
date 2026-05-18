@@ -1046,3 +1046,6 @@ export default function EmberApp() {
     </div>
   );
 }
+
+import ReactDOM from 'react-dom/client'
+ReactDOM.createRoot(document.getElementById('root')).render(<EmberApp />)
