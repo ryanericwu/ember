@@ -991,7 +991,8 @@ export default function EmberApp() {
               var todayEx = sets.filter(function(s) { return s.date === currentDate && s.exercise_name === ex.name; });
               var pr = prs[ex.name];
               return (
-                <div key={ex.id} style={{ background: C.card, border: "1px solid " + (isSelected ? C.red : C.border), borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
+                <SwipeToDelete key={ex.id} onDelete={function() { deleteExercise(ex.id); }}>
+                <div style={{ background: C.card, border: "1px solid " + (isSelected ? C.red : C.border), borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
                   <button onClick={function() { setSelEx(isSelected ? "" : ex.name); setAiSug({ loading: false, text: "" }); setShowChart(false); }}
                     style={{ width: "100%", background: "none", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", color: C.text, textAlign: "left" }}>
                     <div>
@@ -1043,7 +1044,7 @@ export default function EmberApp() {
                     </div>
                   )}
                 </div>
-                </SwipeToDelete>
+              </SwipeToDelete>
               );
             })}
             {Object.keys(prs).length > 0 && (
