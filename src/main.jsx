@@ -801,17 +801,7 @@ export default function EmberApp() {
         </div>
       )}
 
-      <div style={{ display: "flex", padding: "0 16px", gap: 5, marginBottom: 20 }}>
-        {NAV.map(function(n) {
-          return (
-            <button key={n.id} onClick={function() { setTab(n.id); }}
-              style={{ flex: 1, padding: "7px 3px", background: tab === n.id ? C.red : C.surface, color: tab === n.id ? "#fff" : C.muted, borderRadius: 10, fontSize: 9, fontWeight: 600, border: "1px solid " + (tab === n.id ? C.red : C.border), boxShadow: tab === n.id ? "0 0 12px " + C.redGlow : "none" }}>
-              <div style={{ fontSize: 15 }}>{n.icon}</div>
-              <div>{n.label}</div>
-            </button>
-          );
-        })}
-      </div>
+
 
       <div style={{ padding: "0 16px", animation: "fadeIn 0.2s ease" }}>
 
